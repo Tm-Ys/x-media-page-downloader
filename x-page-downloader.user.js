@@ -5,7 +5,7 @@
 // @description:zh-CN   一键下载 X 点赞/媒体页面上的全部图片/视频/GIF。自动滚动加载、日期过滤、数量限制，打包为ZIP下载。
 // @author              user
 // @namespace           https://github.com/user
-// @version             2.1
+// @version             2.2
 // @match               https://x.com/*/media
 // @match               https://x.com/*/media/
 // @match               https://x.com/*/likes
@@ -332,17 +332,21 @@
 
     async function scrollToLoadAll() {
         let staleRounds = 0
-        const maxStale = 10
+        const maxStale = 12
+        const step = Math.max(window.innerHeight * 3, 2000)
+        let scrollPos = 0
         setBtnState(LANG.btnScrolling, true)
         while (staleRounds < maxStale) {
             const before = collectedStatusIds.size
-            window.scrollTo(0, document.documentElement.scrollHeight)
-            await sleep(2500)
+            scrollPos += step
+            window.scrollTo(0, scrollPos)
+            window.dispatchEvent(new Event('scroll'))
+            await sleep(2000)
             collectVisibleTweets()
             const targetMet = expectedMediaCount > 0 && collectedStatusIds.size >= expectedMediaCount
             if (targetMet) break
             if (collectedStatusIds.size === before) staleRounds++
-            else staleRounds = 0
+            else { staleRounds = 0; if (PAGE_TYPE === 'likes') { scrollPos -= step * 0.3 } }
         }
     }
 

@@ -60,23 +60,32 @@ This repository provides two TamperMonkey scripts for downloading media (images,
 1. Navigate to `https://x.com/{username}/media` or `https://x.com/{username}/likes`
 2. A floating panel appears at the **bottom-right corner**
 
-   ![screenshot](img/image1.png)
+   ![start panel](img/img_start.png)
 
 3. (Optional) Click ⚙ to configure:
    - **Max media count**: limit number of files to download (0 = unlimited)
    - **Cutoff date**: only download tweets **before** this date
    - Click **Save** (settings persist across sessions)
 
-   ![screenshot](img/image2.png)
+   ![settings](img/img_setting.png)
 
 4. Click **▶ Collect & Download All**
 5. The script will:
-   - Auto-scroll to load all tweets
-   - Fetch each tweet's media via X's internal GraphQL API
-   - Download all files and package them into a ZIP
-6. Download complete panel:
+   - **Auto-scroll** to load all tweets:
 
-   ![screenshot](img/image3.png)
+     ![scrolling](img/img_scrolling.png)
+
+   - **Fetch** each tweet's media via X's internal GraphQL API:
+
+     ![fetching](img/img_Fetching.png)
+
+   - **Package** files into a ZIP:
+
+     ![zipping](img/img_zipping.png)
+
+6. Download complete:
+
+   ![successful](img/img_successful.png)
 
 ### ZIP Structure
 

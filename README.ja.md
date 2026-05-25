@@ -60,23 +60,32 @@
 1. `https://x.com/{ユーザー名}/media` または `https://x.com/{ユーザー名}/likes` にアクセス
 2. 右下にフローティングパネルが表示されます
 
-   ![スクリーンショット](img/image1.png)
+   ![起動パネル](img/img_start.png)
 
 3. （オプション）⚙ をクリックして設定：
    - **Max media count**：ダウンロード数を制限（0 = 無制限）
    - **Cutoff date**：この日付**より前**のツイートのみダウンロード
    - **Save** をクリック（設定は自動的に保存されます）
 
-   ![スクリーンショット](img/image2.png)
+   ![設定パネル](img/img_setting.png)
 
 4. **▶ Collect & Download All** をクリック
 5. スクリプトの動作：
-   - 自動スクロールしてすべてのツイートを読み込み
-   - X 内部の GraphQL API 経由で各ツイートのメディア URL を取得
-   - 全ファイルをダウンロードして ZIP にパッケージ
-6. ダウンロード完了パネル：
+   - **自動スクロール**でツイートを読み込み：
 
-   ![スクリーンショット](img/image3.png)
+     ![スクロール中](img/img_scrolling.png)
+
+   - **メディア URL を取得**：
+
+     ![取得中](img/img_Fetching.png)
+
+   - **ZIP にパッケージ**：
+
+     ![パッケージ中](img/img_zipping.png)
+
+6. ダウンロード完了：
+
+   ![成功](img/img_successful.png)
 
 ### ZIP 構造
 

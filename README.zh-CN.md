@@ -60,23 +60,32 @@
 1. 打开 `https://x.com/{用户名}/media` 或 `https://x.com/{用户名}/likes`
 2. 右下角自动出现浮动面板
 
-   ![截图](img/image1.png)
+   ![初始面板](img/img_start.png)
 
 3. （可选）点击 ⚙ 进行配置：
    - **最大媒体数量**：限制下载文件数（0 = 不限）
    - **截止日期**：只下载该日期**之前**的推文
    - 点击 **保存**（设置会自动记住）
 
-   ![截图](img/image2.png)
+   ![设置面板](img/img_setting.png)
 
 4. 点击 **▶ Collect & Download All**
 5. 脚本会：
-   - 自动向下滚动加载所有推文
-   - 通过 X 内部 GraphQL API 获取每一条推文的媒体 URL
-   - 下载所有文件并打包为 ZIP
+   - **自动滚动**加载所有推文：
+
+     ![滚动中](img/img_scrolling.png)
+
+   - **获取**每一条推文的媒体 URL：
+
+     ![获取中](img/img_Fetching.png)
+
+   - **打包**所有文件为 ZIP：
+
+     ![打包中](img/img_zipping.png)
+
 6. 下载完成：
 
-   ![截图](img/image3.png)
+   ![下载成功](img/img_successful.png)
 
 ### ZIP 目录结构
 

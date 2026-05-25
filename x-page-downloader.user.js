@@ -299,6 +299,10 @@
     }
     function setBtnState(text, disabled) { btnEl.textContent = text; btnEl.disabled = !!disabled }
     function resetPanel() { setPanelProgress(0); setPanelStatus(LANG.idle); setBtnState(LANG.btnStart, false) }
+    function clearLog() {
+        const el = $el('#xpd-log')
+        if (el) el.innerHTML = ''
+    }
     function addLog(type, msg) {
         const el = $el('#xpd-log')
         if (!el) return
@@ -451,6 +455,7 @@
         collectedStatusIds.clear()
         totalMediaCount = 0
         expectedMediaCount = 0
+        clearLog()
     }
 
     function setupNavDetection() {

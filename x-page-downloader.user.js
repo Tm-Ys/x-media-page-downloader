@@ -5,7 +5,7 @@
 // @description:zh-CN   一键下载 X 点赞/媒体页面上的全部图片/视频/GIF。自动滚动加载、日期过滤、数量限制，打包为ZIP下载。
 // @author              Tm-Ys
 // @namespace           https://github.com/Tm-Ys/x-media-page-downloader
-// @version             1.0
+// @version             2.3
 // @match               https://x.com/*/media
 // @match               https://x.com/*/media/
 // @match               https://x.com/*/likes
@@ -107,13 +107,31 @@
     }
 
     function findExpectedCount() {
-        if (PAGE_TYPE !== 'media') return 0
-        const tab = document.querySelector('a[href*="/media"][role="tab"], div[role="tab"][aria-label*="edia"]')
+        const tab = document.querySelector(
+            PAGE_TYPE === 'media'
+                ? 'a[href*="/media"][role="tab"], div[role="tab"][aria-label*="edia"]'
+                : 'a[href*="/likes"][role="tab"], div[role="tab"][aria-label*="ikes"]'
+        )
         if (tab) {
             const m = tab.getAttribute('aria-label') && tab.getAttribute('aria-label').match(/(\d[\d,]*)/)
             if (m) return parseInt(m[1].replace(/,/g, ''))
         }
         return 0
+    }
+
+    function clickRetryButton() {
+        const retryTexts = ['重试', 'Retry', '再試行', 'retry', '重新加载', '请重试']
+        const candidates = document.querySelectorAll('div[role="button"], button, a')
+        for (const el of candidates) {
+            const text = el.textContent.trim()
+            if (text && retryTexts.some(t => text.includes(t))) {
+                if (el.offsetParent !== null) {
+                    el.click()
+                    return true
+                }
+            }
+        }
+        return false
     }
 
     function sanitizeName(name) { return name.replace(/[\\/:*?"<>|]/g, '_').trim() }
@@ -329,9 +347,11 @@
     function updateInfo() {
         let text = `${LANG.found(collectedStatusIds.size)} · ${LANG.media(totalMediaCount)}`
         if (expectedMediaCount > 0) {
-            text = `${LANG.expected(expectedMediaCount, collectedStatusIds.size)} · ${LANG.media(totalMediaCount)}`
+            const label = PAGE_TYPE === 'likes' ? 'Total likes' : 'Expected'
+            setPanelInfo(`${label} ~${expectedMediaCount} · Got ${collectedStatusIds.size} · ${LANG.media(totalMediaCount)}`)
+        } else {
+            setPanelInfo(text)
         }
-        setPanelInfo(text)
     }
 
     async function scrollToLoadAll() {
@@ -340,6 +360,7 @@
         setBtnState(LANG.btnScrolling, true)
         while (staleRounds < maxStale) {
             const before = collectedStatusIds.size
+            if (clickRetryButton()) await sleep(3000)
             window.scrollTo(0, document.documentElement.scrollHeight)
             window.dispatchEvent(new Event('scroll'))
             await sleep(1500)
@@ -350,7 +371,7 @@
             window.dispatchEvent(new Event('scroll'))
             await sleep(2000)
             collectVisibleTweets()
-            const targetMet = expectedMediaCount > 0 && collectedStatusIds.size >= expectedMediaCount
+            const targetMet = PAGE_TYPE === 'media' && expectedMediaCount > 0 && collectedStatusIds.size >= expectedMediaCount
             if (targetMet) break
             if (collectedStatusIds.size === before) staleRounds++
             else staleRounds = 0

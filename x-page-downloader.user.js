@@ -3,9 +3,9 @@
 // @name:zh-CN          X 页面批量下载（点赞/媒体）
 // @description         Download ALL media from X.com likes or media pages. Auto-scrolls, date filter, max count, and packages as ZIP.
 // @description:zh-CN   一键下载 X 点赞/媒体页面上的全部图片/视频/GIF。自动滚动加载、日期过滤、数量限制，打包为ZIP下载。
-// @author              user
-// @namespace           https://github.com/user
-// @version             2.2
+// @author              Tm-Ys
+// @namespace           https://github.com/Tm-Ys/x-media-page-downloader
+// @version             1.0
 // @match               https://x.com/*/media
 // @match               https://x.com/*/media/
 // @match               https://x.com/*/likes

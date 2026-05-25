@@ -10,6 +10,11 @@
 
 ---
 
+
+Greasy Fork リリースページ: https://greasyfork.org/zh-CN/scripts/579708-x-page-batch-downloader
+
+---
+
 ## 概要
 
 X（旧 Twitter）の `/media` および `/likes` ページからすべてのメディア（画像・動画・GIF）を**一括ダウンロード**する TamperMonkey スクリプトです。
@@ -43,10 +48,8 @@ X（旧 Twitter）の `/media` および `/likes` ページからすべてのメ
 ## インストール
 
 1. [TamperMonkey](https://www.tampermonkey.net/) をインストール（Chrome / Firefox / Edge）
-2. 以下のスクリプトの生 URL を開く：
-   - **一括ダウンロード**：[`x-page-downloader.user.js`](x-page-downloader.user.js)
-   - **個別ダウンロード**：[`user.js`](user.js)
-3. TamperMonkey がインストール確認を表示するので **インストール** をクリック
+2. [`x-page-downloader.user.js`](x-page-downloader.user.js) を開く — TamperMonkey がインストール確認を表示
+3. **インストール** をクリック
 
 ### 手動インストール
 

@@ -10,6 +10,14 @@
 
 ---
 
+## 发布页面
+
+
+油叉发布页面: https://greasyfork.org/zh-CN/scripts/579708-x-page-batch-downloader
+
+
+---
+
 ## 概述
 
 一个 TamperMonkey 脚本，用于**批量下载** X（原 Twitter）`/media` 和 `/likes` 页面上的全部媒体（图片、视频、GIF）。
@@ -43,10 +51,8 @@
 ## 安装方法
 
 1. 安装 [TamperMonkey](https://www.tampermonkey.net/)（Chrome / Firefox / Edge）
-2. 直接打开以下脚本原始链接：
-   - **批量下载**：[`x-page-downloader.user.js`](x-page-downloader.user.js)
-   - **单条下载**：[`user.js`](user.js)
-3. TamperMonkey 会自动弹出安装提示 — 点击 **安装**
+2. 打开 [`x-page-downloader.user.js`](x-page-downloader.user.js) — TamperMonkey 自动弹出安装提示
+3. 点击 **安装**
 
 ### 手动安装
 

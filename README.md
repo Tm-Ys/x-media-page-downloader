@@ -9,6 +9,11 @@ THANKS TO [ChinaGodMan](https://github.com/ChinaGodMan/UserScripts) for original
 If you like it, you can give a star⭐ to my repostiry on github!
 
 ---
+## Release
+
+Greasy Fork Release Page: https://greasyfork.org/zh-CN/scripts/579708-x-page-batch-downloader
+
+---
 
 ## Overview
 
@@ -43,10 +48,8 @@ A TamperMonkey script for **batch downloading** all media (images, videos, GIFs)
 ## Installation
 
 1. Install [TamperMonkey](https://www.tampermonkey.net/) (Chrome / Firefox / Edge)
-2. Open the raw script URL:
-   - **Batch download**: [`x-page-downloader.user.js`](x-page-downloader.user.js)
-   - **Single download**: [`user.js`](user.js)
-3. TamperMonkey will prompt you to install — click **Install**
+2. Open [`x-page-downloader.user.js`](x-page-downloader.user.js) — TamperMonkey will prompt you to install
+3. Click **Install**
 
 ### Manual Installation
 

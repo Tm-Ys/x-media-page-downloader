@@ -12,12 +12,9 @@
 
 ## 概述
 
-本仓库提供两个 TamperMonkey 脚本，用于从 X（原 Twitter）下载媒体（图片、视频、GIF）：
+一个 TamperMonkey 脚本，用于**批量下载** X（原 Twitter）`/media` 和 `/likes` 页面上的全部媒体（图片、视频、GIF）。
 
-| 脚本 | 用途 |
-|---|---|
-| **`x-page-downloader.user.js`** | **批量下载** — 用户 `/media` 或 `/likes` 页面上的全部媒体 |
-| **`user.js`** | **单条下载** — 每条推文加一个下载按钮（原作者 [ChinaGodMan](https://github.com/ChinaGodMan/UserScripts)） |
+> 单条推文下载的原版脚本来自 [ChinaGodMan](https://github.com/ChinaGodMan/UserScripts)。
 
 ---
 

@@ -12,12 +12,9 @@
 
 ## 概要
 
-このリポジトリは、X（旧 Twitter）からメディア（画像・動画・GIF）をダウンロードするための 2 つの TamperMonkey スクリプトを提供します：
+X（旧 Twitter）の `/media` および `/likes` ページからすべてのメディア（画像・動画・GIF）を**一括ダウンロード**する TamperMonkey スクリプトです。
 
-| スクリプト | 用途 |
-|---|---|
-| **`x-page-downloader.user.js`** | **一括ダウンロード** — ユーザーの `/media` または `/likes` ページの全メディア |
-| **`user.js`** | **個別ダウンロード** — 各ツイートにダウンロードボタンを追加（原作者 [ChinaGodMan](https://github.com/ChinaGodMan/UserScripts)） |
+> 単一ツイート用のオリジナルスクリプトは [ChinaGodMan](https://github.com/ChinaGodMan/UserScripts) によるものです。
 
 ---
 

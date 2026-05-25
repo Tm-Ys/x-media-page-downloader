@@ -12,12 +12,9 @@ If you like it, you can give a star⭐ to my repostiry on github!
 
 ## Overview
 
-This repository provides two TamperMonkey scripts for downloading media (images, videos, GIFs) from X (formerly Twitter):
+A TamperMonkey script for **batch downloading** all media (images, videos, GIFs) from X (formerly Twitter) `/media` and `/likes` pages.
 
-| Script | Purpose |
-|---|---|
-| **`x-page-downloader.user.js`** | **Batch download** — all media from a user's `/media` or `/likes` page |
-| **`user.js`** | **Single download** — one-click download button on each tweet (original by [ChinaGodMan](https://github.com/ChinaGodMan/UserScripts)) |
+> Original single-tweet download script by [ChinaGodMan](https://github.com/ChinaGodMan/UserScripts).
 
 ---
 

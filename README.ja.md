@@ -81,13 +81,13 @@
 ### ZIP 構造
 
 ```
-橘あき@aki_tatchi.zip
-└── 橘あき@aki_tatchi/
-    ├── 橘あき@aki_tatchi_2058540338411876579.jpg
-    ├── 橘あき@aki_tatchi_2058328300595089506.jpg
-    ├── 橘あき@aki_tatchi_2057214335341256995_1.jpg   (複数画像ツイート)
-    ├── 橘あき@aki_tatchi_2057214335341256995_2.jpg
-    └── 橘あき@aki_tatchi_2056320976921772506.mp4      (動画)
+fullname@username.zip
+└── fullname@username/
+    ├── fullname@username_2058540338411876579.jpg
+    ├── fullname@username_2058328300595089506.jpg
+    ├── fullname@username_2057214335341256995_1.jpg   (複数画像ツイート)
+    ├── fullname@username_2057214335341256995_2.jpg
+    └── fullname@username_2056320976921772506.mp4      (動画)
 ```
 
 ---

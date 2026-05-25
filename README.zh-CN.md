@@ -4,6 +4,10 @@
 
 [English](README.md) | [日本語](README.ja.md)
 
+非常感谢 [ChinaGodMan](https://github.com/ChinaGodMan/UserScripts) 的原始脚本!
+
+如果喜欢的话，点个Star⭐吧。
+
 ---
 
 ## 概述

@@ -336,21 +336,24 @@
 
     async function scrollToLoadAll() {
         let staleRounds = 0
-        const maxStale = 12
-        const step = Math.max(window.innerHeight * 3, 2000)
-        let scrollPos = 0
+        const maxStale = 15
         setBtnState(LANG.btnScrolling, true)
         while (staleRounds < maxStale) {
             const before = collectedStatusIds.size
-            scrollPos += step
-            window.scrollTo(0, scrollPos)
+            window.scrollTo(0, document.documentElement.scrollHeight)
+            window.dispatchEvent(new Event('scroll'))
+            await sleep(1500)
+            window.scrollBy(0, -400)
+            window.dispatchEvent(new Event('scroll'))
+            await sleep(600)
+            window.scrollTo(0, document.documentElement.scrollHeight)
             window.dispatchEvent(new Event('scroll'))
             await sleep(2000)
             collectVisibleTweets()
             const targetMet = expectedMediaCount > 0 && collectedStatusIds.size >= expectedMediaCount
             if (targetMet) break
             if (collectedStatusIds.size === before) staleRounds++
-            else { staleRounds = 0; if (PAGE_TYPE === 'likes') { scrollPos -= step * 0.3 } }
+            else staleRounds = 0
         }
     }
 
@@ -359,36 +362,48 @@
         isDownloading = true
         setBtnState(LANG.btnScrolling, true)
         try {
-            await scrollToLoadAll()
-            const ids = [...collectedStatusIds]
-            if (ids.length === 0) { setPanelStatus(LANG.noMedia); resetPanel(); isDownloading = false; return }
-
-            setPanelStatus(`${LANG.btnFetching} (0/${ids.length})`)
-            setPanelProgress(0)
             const allMedia = []
             const namePrefix = `${sanitizeName(displayName)}@${screenName}`
-            for (let i = 0; i < ids.length; i += 3) {
-                const batch = ids.slice(i, i + 3)
-                const results = await Promise.allSettled(batch.map(id => fetchTweetJson(id)))
-                results.forEach((r) => {
-                    const id = batch[results.indexOf(r)]
-                    if (r.status === 'fulfilled') {
-                        try {
-                            const list = extractMediaUrls(r.value)
-                            list.forEach((m, idx) => {
-                                const ext = m.filename.split('.').pop()
-                                const suffix = list.length > 1 ? `_${idx + 1}` : ''
-                                m.filename = `${namePrefix}_${id}${suffix}.${ext}`
-                                allMedia.push(m)
+            let fetchDone = false
+
+            const fetchTask = (async () => {
+                const fetched = new Set()
+                while (!fetchDone) {
+                    const toFetch = [...collectedStatusIds].filter(id => !fetched.has(id))
+                    if (toFetch.length > 0) {
+                        for (let i = 0; i < toFetch.length; i += 4) {
+                            const batch = toFetch.slice(i, i + 4)
+                            const results = await Promise.allSettled(batch.map(id => fetchTweetJson(id)))
+                            results.forEach((r, idx) => {
+                                const id = batch[idx]
+                                fetched.add(id)
+                                if (r.status === 'fulfilled') {
+                                    try {
+                                        const list = extractMediaUrls(r.value)
+                                        list.forEach((m, i) => {
+                                            const ext = m.filename.split('.').pop()
+                                            const suffix = list.length > 1 ? `_${i + 1}` : ''
+                                            m.filename = `${namePrefix}_${id}${suffix}.${ext}`
+                                            allMedia.push(m)
+                                        })
+                                    } catch (e) { console.warn('extract failed:', id, e) }
+                                } else console.warn('fetch failed:', id, r.reason)
                             })
+                            const done = fetched.size
+                            setPanelStatus(`${LANG.btnFetching} (${done}/${collectedStatusIds.size})`)
+                            setPanelProgress(Math.min(50, Math.round((done / Math.max(collectedStatusIds.size, 1)) * 50)))
+                            await sleep(200)
                         }
-                        catch (e) { console.warn('extract failed:', id, e) }
-                    } else console.warn('fetch failed:', id, r.reason)
-                })
-                setPanelStatus(`${LANG.btnFetching} (${Math.min(i + 3, ids.length)}/${ids.length})`)
-                setPanelProgress(Math.round((Math.min(i + 3, ids.length) / ids.length) * 50))
-                await sleep(300)
-            }
+                    }
+                    await sleep(500)
+                }
+            })()
+
+            await scrollToLoadAll()
+            fetchDone = true
+            await fetchTask
+
+            if (allMedia.length === 0) { setPanelStatus(LANG.noMedia); resetPanel(); isDownloading = false; return }
 
             if (SETTINGS.maxCount > 0 && allMedia.length > SETTINGS.maxCount) {
                 allMedia.length = SETTINGS.maxCount

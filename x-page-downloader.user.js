@@ -1,19 +1,27 @@
 // ==UserScript==
 // @name                X Page Batch Downloader
 // @name:zh-CN          X 页面批量下载（点赞/媒体）
-// @description         Download ALL media from X.com likes or media pages. Auto-scrolls, date filter, max count, and packages as ZIP.
-// @description:zh-CN   一键下载 X 点赞/媒体页面上的全部图片/视频/GIF。自动滚动加载、日期过滤、数量限制，打包为ZIP下载。
+// @description         Download ALL media from X.com likes or media pages (Photos & Videos views). Auto-scrolls, date filter, max count, and packages as ZIP.
+// @description:zh-CN   一键下载 X 点赞/媒体页面上的全部图片/视频/GIF（照片/视频视图）。自动滚动加载、日期过滤、数量限制，打包为ZIP下载。
 // @author              Tm-Ys
 // @namespace           https://github.com/Tm-Ys/x-media-page-downloader
-// @version             2.3
+// @version             2.6
 // @match               https://x.com/*/media
 // @match               https://x.com/*/media/
+// @match               https://x.com/*/media*
+// @match               https://x.com/*/media/*
 // @match               https://x.com/*/likes
 // @match               https://x.com/*/likes/
+// @match               https://x.com/i/history/likes
+// @match               https://x.com/i/history/likes/
 // @match               https://twitter.com/*/media
 // @match               https://twitter.com/*/media/
+// @match               https://twitter.com/*/media*
+// @match               https://twitter.com/*/media/*
 // @match               https://twitter.com/*/likes
 // @match               https://twitter.com/*/likes/
+// @match               https://twitter.com/i/history/likes
+// @match               https://twitter.com/i/history/likes/
 // @icon                https://abs.twimg.com/favicons/twitter-pip.3.ico
 // @grant               GM_download
 // @grant               GM_setValue
@@ -30,7 +38,8 @@
 
     const host = location.hostname
     const path = location.pathname.replace(/\/+$/, '')
-    const screenName = path.split('/')[1]
+    // /i/history/likes (new likes URL) has no screen name — use a neutral label
+    const screenName = path.split('/')[1] === 'i' ? 'me' : path.split('/')[1]
     let PAGE_TYPE = /\/likes$/.test(path) ? 'likes' : 'media'
 
     let STRATEGY = getStrategy()
@@ -51,6 +60,7 @@
     const SETTINGS = {
         maxCount: parseInt(GM_getValue('maxCount', '0')) || 0,
         cutoffDate: GM_getValue('cutoffDate', '') || '',
+        allViews: GM_getValue('allViews', '1') === '1',
     }
 
     const LANG = {
@@ -72,6 +82,9 @@
         saved: '✓ Saved',
         noMedia: 'No media found',
         error: 'Error',
+        allViewsLabel: 'Collect Photos + Videos views (media page only)',
+        viewLabel: (i, n, name) => `⟳ View ${i}/${n} (${name})...`,
+        viewFail: (name) => `Warning: could not load ${name} view — some media may be missing`,
     }
 
     function getStrategy() {
@@ -81,8 +94,8 @@
                 hasMedia: (el) => el.querySelector('div[data-testid="tweetPhoto"], div[data-testid="videoPlayer"]'),
             },
             media: {
-                selector: 'li[role="listitem"]',
-                hasMedia: () => true,
+                selector: 'article[data-testid="tweet"]',
+                hasMedia: (el) => el.querySelector('div[data-testid="tweetPhoto"], div[data-testid="videoPlayer"]'),
             }
         }[PAGE_TYPE]
     }
@@ -204,7 +217,12 @@
         const json = await resp.json()
         let result = json.data && json.data.tweetResult && json.data.tweetResult.result
         if (!result) throw new Error('Empty response')
-        return result.tweet || result
+        const tweet = result.tweet || result
+        const core = result.core || tweet.core
+        const apiName = core && core.user_results && core.user_results.result &&
+            core.user_results.result.legacy && core.user_results.result.legacy.name
+        if (apiName && displayName === screenName && screenName !== 'me') displayName = apiName
+        return tweet
     }
 
     function extractMediaUrls(tweetJson) {
@@ -255,6 +273,11 @@
                     <input id="${id}-maxcount" type="number" min="0" value="${SETTINGS.maxCount}" style="width:100%;padding:6px 8px;border:1px solid #cfd9de;border-radius:8px;font-size:13px;margin-bottom:10px;box-sizing:border-box">
                     <label style="font-size:12px;color:#536471;display:block;margin-bottom:4px">${LANG.cutoffLabel}</label>
                     <input id="${id}-cutoff" type="date" value="${SETTINGS.cutoffDate}" style="width:100%;padding:6px 8px;border:1px solid #cfd9de;border-radius:8px;font-size:13px;margin-bottom:10px;box-sizing:border-box">
+                    <div id="${id}-allviews-row" style="margin-bottom:10px">
+                        <label style="font-size:12px;color:#536471;display:flex;align-items:center;gap:6px;cursor:pointer">
+                            <input id="${id}-allviews" type="checkbox" ${SETTINGS.allViews ? 'checked' : ''} style="margin:0">${LANG.allViewsLabel}
+                        </label>
+                    </div>
                     <button id="${id}-savesettings" style="width:100%;padding:6px;border:none;border-radius:50px;background:#1d9bf0;color:#fff;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:10px;text-align:center">${LANG.save}</button>
                 </div>
                 <div id="${id}-info">${LANG.found(0)} · ${LANG.media(0)}</div>
@@ -295,10 +318,13 @@
         panel.querySelector(`#${id}-savesettings`).onclick = () => {
             const max = parseInt(panel.querySelector(`#${id}-maxcount`).value) || 0
             const date = panel.querySelector(`#${id}-cutoff`).value || ''
+            const allViews = panel.querySelector(`#${id}-allviews`).checked
             SETTINGS.maxCount = max
             SETTINGS.cutoffDate = date
+            SETTINGS.allViews = allViews
             GM_setValue('maxCount', max.toString())
             GM_setValue('cutoffDate', date)
+            GM_setValue('allViews', allViews ? '1' : '0')
             panel.querySelector(`#${id}-savesettings`).textContent = LANG.saved
             setTimeout(() => { panel.querySelector(`#${id}-savesettings`).textContent = LANG.save }, 1500)
         }
@@ -306,6 +332,12 @@
         progressEl = panel.querySelector(`#${id}-progress-bar`)
         btnEl = panel.querySelector(`#${id}-btn`)
         btnEl.onclick = onDownloadClick
+        setAllViewsVisible()
+    }
+
+    function setAllViewsVisible() {
+        const el = $el('#xpd-allviews-row')
+        if (el) el.style.display = PAGE_TYPE === 'media' ? '' : 'none'
     }
 
     function setPanelInfo(text) { const el = $el('#xpd-info'); if (el) el.textContent = text }
@@ -356,9 +388,10 @@
 
     async function scrollToLoadAll() {
         let staleRounds = 0
-        const maxStale = 15
+        const maxStale = 6
         setBtnState(LANG.btnScrolling, true)
         while (staleRounds < maxStale) {
+            setPanelStatus(`${LANG.btnScrolling} (no new: ${staleRounds}/${maxStale})`)
             const before = collectedStatusIds.size
             if (clickRetryButton()) await sleep(3000)
             window.scrollTo(0, document.documentElement.scrollHeight)
@@ -378,13 +411,60 @@
         }
     }
 
+    // X now splits the media tab into views: /media (Videos) and /media?filter=photo (Photos).
+    // Switch views via SPA navigation (X uses the history package — it listens for popstate).
+    function spaNavigate(url) {
+        history.pushState({}, '', url)
+        window.dispatchEvent(new PopStateEvent('popstate'))
+    }
+
+    function getMediaViews() {
+        const currentUrl = location.href.split('#')[0]
+        const filter = new URLSearchParams(location.search).get('filter')
+        const base = `${location.origin}${location.pathname.replace(/\/+$/, '')}`
+        if (filter === 'photo') {
+            return [{ url: currentUrl, label: 'Photos' }, { url: base, label: 'Videos' }]
+        }
+        return [{ url: currentUrl, label: 'Videos' }, { url: `${base}?filter=photo`, label: 'Photos' }]
+    }
+
+    async function waitForViewContent(beforeSize, timeoutMs) {
+        const deadline = Date.now() + timeoutMs
+        while (Date.now() < deadline) {
+            collectVisibleTweets()
+            if (collectedStatusIds.size > beforeSize) return true
+            await sleep(500)
+        }
+        return false
+    }
+
+    async function collectAllMediaViews() {
+        const views = getMediaViews()
+        const origUrl = views[0].url
+        for (let i = 0; i < views.length; i++) {
+            const view = views[i]
+            setPanelStatus(LANG.viewLabel(i + 1, views.length, view.label))
+            if (view.url !== location.href.split('#')[0]) {
+                spaNavigate(view.url)
+                const before = collectedStatusIds.size
+                if (!(await waitForViewContent(before, 10000))) {
+                    addLog('fail', LANG.viewFail(view.label))
+                }
+            }
+            await scrollToLoadAll()
+        }
+        if (views.length > 1) spaNavigate(origUrl)
+    }
+
     async function onDownloadClick() {
         if (isDownloading) return
         isDownloading = true
         setBtnState(LANG.btnScrolling, true)
         try {
+            if (displayName === screenName && collectedStatusIds.size > 0) {
+                try { await fetchTweetJson([...collectedStatusIds][0]) } catch (e) { console.warn('fetch display name failed:', e) }
+            }
             const allMedia = []
-            const namePrefix = `${sanitizeName(displayName)}@${screenName}`
             let fetchDone = false
 
             const fetchTask = (async () => {
@@ -401,6 +481,7 @@
                                 if (r.status === 'fulfilled') {
                                     try {
                                         const list = extractMediaUrls(r.value)
+                                        const namePrefix = `${sanitizeName(displayName)}@${screenName}`
                                         list.forEach((m, i) => {
                                             const ext = m.filename.split('.').pop()
                                             const suffix = list.length > 1 ? `_${i + 1}` : ''
@@ -420,7 +501,8 @@
                 }
             })()
 
-            await scrollToLoadAll()
+            if (PAGE_TYPE === 'media' && SETTINGS.allViews) await collectAllMediaViews()
+            else await scrollToLoadAll()
             fetchDone = true
             await fetchTask
 
@@ -437,30 +519,17 @@
             setPanelStatus(LANG.btnZipping)
             setPanelProgress(60)
             const folderName = `${sanitizeName(displayName)}@${screenName}`
-            const zip = new JSZip()
-            const folder = zip.folder(folderName)
-            let added = 0
-            for (const m of allMedia) {
-                setPanelStatus(`${LANG.btnZipping} (${added + 1}/${allMedia.length})`)
-                setPanelProgress(60 + Math.round((added / allMedia.length) * 30))
-                try {
-                    const resp = await fetch(m.url, { headers: { Referer: `https://${host}/` } })
-                    if (resp.ok) { folder.file(m.filename, await resp.blob()); added++ }
-                } catch (e) { console.warn('fetch media failed:', m.url, e) }
-                await sleep(100)
-            }
-            setPanelStatus(LANG.downloading)
-            setPanelProgress(95)
-            const blob = await zip.generateAsync({ type: 'blob' }, (m) => setPanelProgress(90 + Math.round(m.percent * 0.1)))
-            const url = URL.createObjectURL(blob)
-            const name = `${folderName}.zip`
+            const BATCH_SIZE = 500
+            let totalAdded = 0
+            let batchIndex = 0
             let completeCalled = false
+
             function finish() {
                 if (completeCalled) return; completeCalled = true
-                setPanelStatus(`${LANG.complete} (${added} files)`)
+                setPanelStatus(`${LANG.complete} (${totalAdded} files)`)
                 setPanelProgress(100)
                 setBtnState(LANG.complete, true)
-                addLog('succ', `Download successful! (${added} files)`)
+                addLog('succ', `Download successful! (${totalAdded} files)`)
                 setTimeout(resetPanel, 3000)
                 isDownloading = false
             }
@@ -472,18 +541,51 @@
                 setTimeout(resetPanel, 4000)
                 isDownloading = false
             }
-            if (/firefox/i.test(navigator.userAgent)) {
-                GM_download({
-                    url, name,
-                    onload: () => { URL.revokeObjectURL(url); finish() },
-                    onerror: (e) => { URL.revokeObjectURL(url); fail(e) }
-                })
-            } else {
-                const a = document.createElement('a'); a.href = url; a.download = name
-                document.body.appendChild(a); a.click()
-                setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url) }, 200)
-                finish()
+            function triggerDownload(url, name) {
+                if (/firefox/i.test(navigator.userAgent)) {
+                    GM_download({
+                        url, name,
+                        onload: () => { URL.revokeObjectURL(url) },
+                        onerror: (e) => { URL.revokeObjectURL(url); fail(e) }
+                    })
+                } else {
+                    const a = document.createElement('a'); a.href = url; a.download = name
+                    document.body.appendChild(a); a.click()
+                    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url) }, 200)
+                }
             }
+
+            for (let start = 0; start < allMedia.length; start += BATCH_SIZE) {
+                if (completeCalled) break
+                const batch = allMedia.slice(start, start + BATCH_SIZE)
+                batchIndex++
+                const zip = new JSZip()
+                const folder = zip.folder(folderName)
+                let batchAdded = 0
+
+                for (const m of batch) {
+                    setPanelStatus(`${LANG.btnZipping} batch ${batchIndex} (${batchAdded + 1}/${batch.length})`)
+                    setPanelProgress(60 + Math.round(((start + batchAdded) / allMedia.length) * 30))
+                    try {
+                        const resp = await fetch(m.url, { headers: { Referer: `https://${host}/` } })
+                        if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
+                        const buf = await resp.arrayBuffer()
+                        folder.file(m.filename, new Uint8Array(buf))
+                        batchAdded++
+                    } catch (e) { console.warn('fetch media failed:', m.url, e) }
+                }
+
+                if (batchAdded === 0) continue
+                totalAdded += batchAdded
+                setPanelStatus(`Creating ZIP ${batchIndex}...`)
+                setPanelProgress(90 + Math.round((start / allMedia.length) * 10))
+                const blob = await zip.generateAsync({ type: 'blob', streamFiles: true })
+                const url = URL.createObjectURL(blob)
+                const suffix = allMedia.length > BATCH_SIZE ? `_part${batchIndex}` : ''
+                triggerDownload(url, `${folderName}${suffix}.zip`)
+                await sleep(500)
+            }
+            finish()
         } catch (e) { console.error(e); addLog('fail', `Download failed! ${e.message}`); setPanelStatus(`${LANG.error}: ${e.message}`); setTimeout(resetPanel, 4000); isDownloading = false }
     }
 
@@ -507,6 +609,7 @@
                 if (!isTarget) return
                 PAGE_TYPE = /\/likes$/.test(p) ? 'likes' : 'media'
                 STRATEGY = getStrategy()
+                setAllViewsVisible()
                 resetState()
                 extractDisplayName()
                 expectedMediaCount = findExpectedCount()

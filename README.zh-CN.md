@@ -29,6 +29,7 @@
 ## 功能特性 (`x-page-downloader.user.js`)
 
 - **批量抓取** — 一键下载用户媒体库或点赞中的全部图片/视频/GIF
+- **照片/视频双视图** — X 现在把媒体页拆分为 `/media`（视频）和 `/media?filter=photo`（照片）；一键同时抓取**两个视图**（可在设置中关闭，仅媒体页生效）
 - **自动滚动** — 模拟滚到底部加载更多内容，直到无新内容或达到预期数量
 - **ZIP 打包** — 所有文件打包为一个 ZIP，内部目录 `{显示名}@{用户名}/`
 - **文件命名** — `{显示名}@{用户名}_{推文ID}_{序号}.{后缀}`（多条媒体时添加序号）
@@ -43,8 +44,9 @@
 
 | 页面 | URL 模式 | DOM 结构 |
 |---|---|---|
-| 媒体库 | `https://x.com/{用户}/media` | `li[role="listitem"]` 网格 |
-| 点赞 | `https://x.com/{用户}/likes` | `article[data-testid="tweet"]` 时间线 |
+| 媒体库 — 视频 | `https://x.com/{用户}/media` | `article[data-testid="tweet"]` 时间线（视频） |
+| 媒体库 — 照片 | `https://x.com/{用户}/media?filter=photo` | `article[data-testid="tweet"]` 时间线（照片） |
+| 点赞 | `https://x.com/{用户}/likes` / `https://x.com/i/history/likes` | `article[data-testid="tweet"]` 时间线 |
 
 ---
 
@@ -72,6 +74,7 @@
 3. （可选）点击 ⚙ 进行配置：
    - **最大媒体数量**：限制下载文件数（0 = 不限）
    - **截止日期**：只下载该日期**之前**的推文
+   - **Collect Photos + Videos views**：媒体页上一键同时下载视频视图（`/media`）和照片视图（`/media?filter=photo`），取消勾选则只下载当前视图
    - 点击 **保存**（设置会自动记住）
 
    ![设置面板](img/img_setting.png)
@@ -114,6 +117,7 @@ fullname@username.zip
 |---|---|---|
 | **Max media count** | 最大下载文件数（0 = 不限） | `0` |
 | **Cutoff date** | 只下载此日期之前的推文（留空 = 不限） | `''` |
+| **Collect Photos + Videos views** | 媒体页上同时抓取另一个视图（`/media` ↔ `/media?filter=photo`） | 开启 |
 
 设置通过 `GM_setValue` 持久化保存，刷新页面后依然有效。
 
@@ -123,6 +127,7 @@ fullname@username.zip
 
 - GraphQL API 使用了硬编码的查询 ID（`2ICDjqPd81tulZcYrtpTuQ`）。如果 X 端更新该 ID，脚本可能失效，需要手动更新。
 - 敏感内容推文只要 API 返回了媒体 URL，仍可正常下载。
+- 媒体页现在把照片和视频拆分为两个视图（`/media` = 视频，`/media?filter=photo` = 照片）。默认开启"照片/视频双视图"设置，脚本会自动切换两个视图抓取。
 - 超大量下载（500+ 文件）时，ZIP 打包会消耗较多内存，请耐心等待。
 - 原版单条下载脚本 `user.js` 由 [ChinaGodMan](https://github.com/ChinaGodMan/UserScripts) 独立维护。
 

@@ -26,6 +26,7 @@ X（旧 Twitter）の `/media` および `/likes` ページからすべてのメ
 ## 機能 (`x-page-downloader.user.js`)
 
 - **一括取得** — ユーザーのメディアギャラリーやいいねしたツイートから全画像・動画・GIF を取得
+- **写真/動画の両ビュー** — X はメディアタブを `/media`（動画）と `/media?filter=photo`（写真）に分割しています。ワンクリックで**両方のビュー**を自動収集（設定で無効化可、メディアページのみ）
 - **自動スクロール** — 自動的にスクロールしてすべてのコンテンツを読み込み、新しいアイテムがなくなるか期待数に達したら停止
 - **ZIP パッケージ** — すべてのファイルを 1 つの ZIP にまとめ、`{表示名}@{ユーザー名}/` フォルダに整理
 - **ファイル名** — `{表示名}@{ユーザー名}_{ツイートID}_{n}.{拡張子}`（複数メディアの場合のみインデックス付加）
@@ -40,8 +41,9 @@ X（旧 Twitter）の `/media` および `/likes` ページからすべてのメ
 
 | ページ | URL パターン | DOM 構造 |
 |---|---|---|
-| メディアギャラリー | `https://x.com/{ユーザー}/media` | `li[role="listitem"]` グリッド |
-| いいね | `https://x.com/{ユーザー}/likes` | `article[data-testid="tweet"]` タイムライン |
+| メディアギャラリー — 動画 | `https://x.com/{ユーザー}/media` | `article[data-testid="tweet"]` タイムライン（動画） |
+| メディアギャラリー — 写真 | `https://x.com/{ユーザー}/media?filter=photo` | `article[data-testid="tweet"]` タイムライン（写真） |
+| いいね | `https://x.com/{ユーザー}/likes` / `https://x.com/i/history/likes` | `article[data-testid="tweet"]` タイムライン |
 
 ---
 
@@ -69,6 +71,7 @@ X（旧 Twitter）の `/media` および `/likes` ページからすべてのメ
 3. （オプション）⚙ をクリックして設定：
    - **Max media count**：ダウンロード数を制限（0 = 無制限）
    - **Cutoff date**：この日付**より前**のツイートのみダウンロード
+   - **Collect Photos + Videos views**：メディアページで動画ビュー（`/media`）と写真ビュー（`/media?filter=photo`）をワンクリックで両方ダウンロード。オフにすると現在のビューのみ
    - **Save** をクリック（設定は自動的に保存されます）
 
    ![設定パネル](img/img_setting.png)
@@ -111,6 +114,7 @@ fullname@username.zip
 |---|---|---|
 | **Max media count** | 最大ダウンロードファイル数（0 = 無制限） | `0` |
 | **Cutoff date** | この日付より前のツイートのみダウンロード（空欄 = フィルターなし） | `''` |
+| **Collect Photos + Videos views** | メディアページでもう一方のビュー（`/media` ↔ `/media?filter=photo`）も収集 | オン |
 
 設定は `GM_setValue` で保存され、ページを跨いでも維持されます。
 
@@ -120,6 +124,7 @@ fullname@username.zip
 
 - GraphQL API はハードコードされたクエリ ID（`2ICDjqPd81tulZcYrtpTuQ`）を使用しています。X 側で ID が変更された場合、スクリプトが動作しなくなる可能性があります。
 - センシティブな内容のツイートも、API がメディア URL を返す限りダウンロード可能です。
+- メディアタブは現在、写真と動画が別ビューになっています（`/media` = 動画、`/media?filter=photo` = 写真）。デフォルト設定ではスクリプトが両ビューを自動的に巡回します。
 - 大量のファイル（500+）をダウンロードする場合、ZIP 生成に時間がかかり、メモリを多く消費します。
 - 元の個別ダウンロードスクリプト `user.js` は [ChinaGodMan](https://github.com/ChinaGodMan/UserScripts) が別途メンテナンスしています。
 

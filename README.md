@@ -26,6 +26,7 @@ A TamperMonkey script for **batch downloading** all media (images, videos, GIFs)
 ## Features (`x-page-downloader.user.js`)
 
 - **Batch download** — grab every image/video/GIF from a user's media gallery or liked tweets
+- **Photos & Videos views** — X now splits the media tab into `/media` (Videos) and `/media?filter=photo` (Photos); one click collects **both views** automatically (toggle in settings, media pages only)
 - **Auto-scroll** — automatically scrolls to load all content; stops when no more items appear or when the expected count is met
 - **ZIP packaging** — all files are packaged into a single ZIP, organized under `{DisplayName}@{Username}/`
 - **File naming** — `{DisplayName}@{Username}_{StatusId}_{n}.{ext}` (index appended only for tweets with multiple media)
@@ -40,8 +41,9 @@ A TamperMonkey script for **batch downloading** all media (images, videos, GIFs)
 
 | Page | URL Pattern | Structure |
 |---|---|---|
-| Media gallery | `https://x.com/{user}/media` | `li[role="listitem"]` grid |
-| Liked tweets | `https://x.com/{user}/likes` | `article[data-testid="tweet"]` timeline |
+| Media gallery — Videos | `https://x.com/{user}/media` | `article[data-testid="tweet"]` timeline (videos) |
+| Media gallery — Photos | `https://x.com/{user}/media?filter=photo` | `article[data-testid="tweet"]` timeline (photos) |
+| Liked tweets | `https://x.com/{user}/likes` / `https://x.com/i/history/likes` | `article[data-testid="tweet"]` timeline |
 
 ---
 
@@ -69,6 +71,7 @@ A TamperMonkey script for **batch downloading** all media (images, videos, GIFs)
 3. (Optional) Click ⚙ to configure:
    - **Max media count**: limit number of files to download (0 = unlimited)
    - **Cutoff date**: only download tweets **before** this date
+   - **Collect Photos + Videos views**: on media pages, one click downloads both the Videos view (`/media`) and the Photos view (`/media?filter=photo`). Uncheck to download only the current view.
    - Click **Save** (settings persist across sessions)
 
    ![settings](img/img_setting.png)
@@ -111,6 +114,7 @@ fullname@username.zip
 |---|---|---|
 | **Max media count** | Maximum number of files to download (0 = unlimited) | `0` |
 | **Cutoff date** | Only download tweets created before this date (empty = no filter) | `''` |
+| **Collect Photos + Videos views** | On media pages, also collect the other view (`/media` ↔ `/media?filter=photo`) | `on` |
 
 Settings are stored via `GM_setValue` and persist across page loads.
 
@@ -120,6 +124,7 @@ Settings are stored via `GM_setValue` and persist across page loads.
 
 - The GraphQL API uses a hardcoded query ID (`2ICDjqPd81tulZcYrtpTuQ` for `TweetResultByRestId`). If X updates this ID, the script may break and require an update.
 - Sensitive content tweets are downloaded normally as long as the media URL is returned by the API.
+- The media tab now splits photos and videos (`/media` = Videos, `/media?filter=photo` = Photos). With the default "Collect Photos + Videos views" setting, the script visits both views for you.
 - For very large collections (500+ items), ZIP generation may take a while and use significant memory.
 - The original `user.js` (single-tweet download) is maintained separately by [ChinaGodMan](https://github.com/ChinaGodMan/UserScripts).
 
